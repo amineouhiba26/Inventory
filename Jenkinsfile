@@ -2,7 +2,11 @@ pipeline {
     agent any
     
     triggers { 
-        pollSCM('H/5 * * * *')  // Poll every 5 minutes for changes
+        pollSCM('H/5 * * * *')
+    }
+    
+    options {
+        skipDefaultCheckout(true)
     }
     
     environment {
@@ -125,20 +129,20 @@ pipeline {
     
     post {
         always {
-            echo 'Cleaning up Docker system...'
-            sh 'docker system prune -af || true'  // Clean everything like in class example
-            sh 'docker logout || true'
+            script {
+                try {
+                    echo 'Cleaning up Docker system...'
+                    sh 'docker system prune -af || true'
+                    sh 'docker logout || true'
+                } catch (Exception e) {
+                    echo "Cleanup failed: ${e.getMessage()}"
+                }
+            }
         }
         success {
             echo "Pipeline completed successfully!"
-            script {
-                if (env.CHANGE_TARGET) {
-                    echo "Backend image: ${IMAGE_BACKEND}:${BUILD_TAG}"
-                    echo "Frontend image: ${IMAGE_FRONTEND}:${BUILD_TAG}"
-                } else {
-                    echo "No changes detected - skipped builds"
-                }
-            }
+            echo "Backend image: ${IMAGE_BACKEND}:${BUILD_TAG}"
+            echo "Frontend image: ${IMAGE_FRONTEND}:${BUILD_TAG}"
         }
         failure {
             echo "Pipeline failed! Check the logs for details."
