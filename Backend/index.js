@@ -14,7 +14,9 @@ const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://localhost:30002',  // Kubernetes NodePort
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:30002'
   ],
   credentials: true
 };
