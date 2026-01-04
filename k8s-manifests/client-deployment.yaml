@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: inventory-client
+  template:
+    metadata:
+      labels:
+        app: inventory-client
+    spec:
+      containers:
+      - name: inventory-client
+        image: amineouhiba/inventory-frontend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-configmap
+              key: REACT_APP_API_URL

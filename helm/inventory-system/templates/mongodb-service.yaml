@@ -1,0 +1,19 @@
+{{- if .Values.mongodb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: inventory-mongodb
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: {{ .Values.mongodb.service.type }}
+  ports:
+  - port: {{ .Values.mongodb.service.port }}
+    targetPort: {{ .Values.mongodb.service.port }}
+    protocol: TCP
+    name: mongodb
+  selector:
+    app: inventory-mongodb
+{{- end }}

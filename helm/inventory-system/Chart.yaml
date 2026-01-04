@@ -1,0 +1,22 @@
+apiVersion: v2
+name: inventory-system
+description: A Helm chart for Inventory Management System (MERN Stack)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - inventory
+  - mern
+  - mongodb
+  - react
+  - nodejs
+  - kubernetes
+
+maintainers:
+  - name: Amine Ouhiba
+    email: amineouhiba@example.com
+
+home: https://github.com/amineouhiba26/Inventory
+sources:
+  - https://github.com/amineouhiba26/Inventory

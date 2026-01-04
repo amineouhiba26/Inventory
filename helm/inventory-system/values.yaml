@@ -1,0 +1,90 @@
+# Default values for inventory-system.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: inventory-system
+
+mongodb:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: mongo
+    tag: "7"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 27017
+  
+  persistence:
+    enabled: false
+    storageClass: "hostpath"
+    size: 5Gi
+  
+  env:
+    - name: MONGO_INITDB_DATABASE
+      value: inventory
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+backend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: amineouhiba/inventory-backend
+    tag: "latest"
+    pullPolicy: Always
+  
+  service:
+    type: NodePort
+    port: 3001
+    nodePort: 30001
+  
+  env:
+    PORT: "3001"
+    MONGODB_URI: "mongodb://mongodb-service:27017/inventory"
+    NODE_ENV: "production"
+  
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: amineouhiba/inventory-frontend
+    tag: "latest"
+    pullPolicy: Always
+  
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30002
+  
+  env:
+    REACT_APP_API_URL: "http://localhost:30001"
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"

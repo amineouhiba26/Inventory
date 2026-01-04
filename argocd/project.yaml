@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: inventory-project
+  namespace: argocd
+  labels:
+    project: inventory
+spec:
+  description: Inventory Management System Project
+  
+  # Allow deploying to these clusters
+  destinations:
+    - namespace: inventory-system
+      server: https://kubernetes.default.svc
+    - namespace: inventory-*
+      server: https://kubernetes.default.svc
+  
+  # Allow deploying from these Git repositories
+  sourceRepos:
+    - https://github.com/amineouhiba26/Inventory.git
+    - '*'
+  
+  # Cluster resource whitelist (what can be deployed cluster-wide)
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource whitelist (what can be deployed in namespace)
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ConfigMap
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: PersistentVolumeClaim
+    - group: 'apps'
+      kind: Deployment
+    - group: 'apps'
+      kind: StatefulSet
+    - group: 'apps'
+      kind: ReplicaSet
+    - group: 'batch'
+      kind: Job
+    - group: 'batch'
+      kind: CronJob
+  
+  # Orphaned resources handling
+  orphanedResources:
+    warn: true

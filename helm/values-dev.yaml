@@ -1,0 +1,54 @@
+# Development Environment Values
+# Usage: helm install inventory-system helm/inventory-system -f helm/values-dev.yaml
+
+namespace: inventory-system-dev
+
+mongodb:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: false  # Use emptyDir for dev
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+backend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: amineouhiba/inventory-backend
+    tag: "latest"
+    pullPolicy: Always
+  env:
+    PORT: "3001"
+    MONGODB_URI: "mongodb://mongodb:27017/inventory"
+    NODE_ENV: "development"
+    FRONTEND_URL: "http://localhost:3000"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "250m"
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: amineouhiba/inventory-frontend
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    type: NodePort
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"

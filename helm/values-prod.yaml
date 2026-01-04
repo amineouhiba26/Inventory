@@ -1,0 +1,65 @@
+# Production Environment Values
+# Usage: helm install inventory-system helm/inventory-system -f helm/values-prod.yaml
+
+namespace: inventory-system
+
+mongodb:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: mongo
+    tag: "7"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    storageClass: "hostpath"
+    size: 10Gi
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+backend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: amineouhiba/inventory-backend
+    tag: "v1.0.0"  # Use specific version in production
+    pullPolicy: IfNotPresent
+  env:
+    PORT: "3001"
+    MONGODB_URI: "mongodb://mongodb:27017/inventory"
+    NODE_ENV: "production"
+    FRONTEND_URL: "http://localhost:3000"
+  healthCheck:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: amineouhiba/inventory-frontend
+    tag: "v1.0.0"  # Use specific version in production
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "400m"

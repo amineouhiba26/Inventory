@@ -1,0 +1,47 @@
+{{- if .Values.mongodb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: inventory-mongodb
+    tier: database
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.mongodb.replicaCount }}
+  selector:
+    matchLabels:
+      app: inventory-mongodb
+  template:
+    metadata:
+      labels:
+        app: inventory-mongodb
+        tier: database
+    spec:
+      containers:
+      - name: mongodb
+        image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+        imagePullPolicy: {{ .Values.mongodb.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.mongodb.service.port }}
+          name: mongodb
+        env:
+        {{- range .Values.mongodb.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        {{- if .Values.mongodb.persistence.enabled }}
+        volumeMounts:
+        - name: mongodb-storage
+          mountPath: /data/db
+        {{- end }}
+        resources:
+          {{- toYaml .Values.mongodb.resources | nindent 10 }}
+      {{- if .Values.mongodb.persistence.enabled }}
+      volumes:
+      - name: mongodb-storage
+        persistentVolumeClaim:
+          claimName: mongodb-pvc
+      {{- end }}
+{{- end }}

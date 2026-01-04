@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: inventory-system
+  namespace: argocd
+  labels:
+    app: inventory
+    environment: production
+spec:
+  project: inventory-project
+  
+  source:
+    repoURL: https://github.com/amineouhiba26/Inventory.git
+    targetRevision: devops
+    path: helm/inventory-system
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: namespace
+          value: inventory-system
+        - name: backend.replicaCount
+          value: "3"
+        - name: frontend.replicaCount
+          value: "3"
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: inventory-system
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  revisionHistoryLimit: 10
+  
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
