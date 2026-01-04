@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    options {
+        skipDefaultCheckout(true)
+    }
+    
     environment {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-creds'
         IMAGE_NAME = 'amineouhiba26/inventory-backend'
@@ -8,6 +12,17 @@ pipeline {
     }
     
     stages {
+        stage('Checkout') {
+            steps {
+                echo 'Manually checking out code...'
+                script {
+                    checkout([$class: 'GitSCM', 
+                              branches: [[name: '*/devops']], 
+                              userRemoteConfigs: [[url: 'https://github.com/amineouhiba26/Inventory.git']]])
+                }
+            }
+        }
+        
         stage('Verify Workspace') {
             steps {
                 echo 'Verifying workspace contents...'
