@@ -9,16 +9,29 @@ const port = process.env.PORT || 3001
 const cors = require('cors')
 const router = require('./Routes/router')
 
-// Configure CORS with environment variables
+// Configure CORS - Allow all origins in development/production
 const corsOptions = {
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'http://localhost:3000',
-    'http://localhost:30002',  // Kubernetes NodePort
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:30002'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:30002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:30002',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`[CORS] Allowing origin: ${origin}`);
+      callback(null, true); // Allow all origins for now
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
