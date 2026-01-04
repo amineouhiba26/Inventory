@@ -8,18 +8,13 @@ pipeline {
     }
     
     stages {
-        stage('Checkout') {
+        stage('Verify Workspace') {
             steps {
-                echo 'Checking out code from repository...'
-                checkout scm
-            }
-        }
-        
-        stage('List Files') {
-            steps {
-                echo 'Listing workspace contents...'
+                echo 'Verifying workspace contents...'
                 sh 'ls -la'
                 sh 'pwd'
+                sh 'echo "Current branch: $(git branch --show-current || echo unknown)"'
+                sh 'echo "Git status:"; git status || echo "Not a git repository"'
             }
         }
         
