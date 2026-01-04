@@ -1,0 +1,28 @@
+
+services:
+  mongodb:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_DATABASE: inventory
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/inventory
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:

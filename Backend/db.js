@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose')
-const mongoURI = process.env.ATLAS_URI;
+const mongoURI = process.env.MONGODB_URI || process.env.ATLAS_URI;
 
 const connectToMongo = async () => {
   try {
