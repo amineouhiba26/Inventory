@@ -107,12 +107,16 @@ pipeline {
                     
                     if (credentialsExist) {
                         echo '✅ Docker Hub credentials found - pushing images...'
-                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            sh '''
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                                docker push ${IMAGE_BACKEND}:${BUILD_TAG}
-                                docker push ${IMAGE_BACKEND}:latest
-                            '''
+                        retry(3) {
+                            withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                                sh '''
+                                    echo "🔄 Attempting Docker login..."
+                                    echo "$DOCKER_PASS" | timeout 60 docker login -u "$DOCKER_USER" --password-stdin
+                                    echo "📤 Pushing backend image..."
+                                    timeout 300 docker push ${IMAGE_BACKEND}:${BUILD_TAG}
+                                    timeout 300 docker push ${IMAGE_BACKEND}:latest
+                                '''
+                            }
                         }
                         echo "✅ Backend image pushed successfully!"
                     } else {
@@ -148,12 +152,16 @@ pipeline {
                     
                     if (credentialsExist) {
                         echo '✅ Docker Hub credentials found - pushing images...'
-                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            sh '''
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                                docker push ${IMAGE_FRONTEND}:${BUILD_TAG}
-                                docker push ${IMAGE_FRONTEND}:latest
-                            '''
+                        retry(3) {
+                            withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                                sh '''
+                                    echo "🔄 Attempting Docker login..."
+                                    echo "$DOCKER_PASS" | timeout 60 docker login -u "$DOCKER_USER" --password-stdin
+                                    echo "📤 Pushing frontend image..."
+                                    timeout 300 docker push ${IMAGE_FRONTEND}:${BUILD_TAG}
+                                    timeout 300 docker push ${IMAGE_FRONTEND}:latest
+                                '''
+                            }
                         }
                         echo "✅ Frontend image pushed successfully!"
                     } else {
