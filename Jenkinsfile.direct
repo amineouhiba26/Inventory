@@ -33,8 +33,8 @@ pipeline {
                 echo 'Verifying workspace contents...'
                 sh 'ls -la'
                 sh 'pwd'
-                sh 'echo "Files in backend directory:"; ls -la backend/ || echo "backend directory not found"'
-                sh 'echo "Files in frontend directory:"; ls -la frontend/ || echo "frontend directory not found"'
+                sh 'echo "Files in Backend directory:"; ls -la Backend/ || echo "Backend directory not found"'
+                sh 'echo "Files in Frontend directory:"; ls -la Frontend/ || echo "Frontend directory not found"'
             }
         }
         
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 echo 'Building backend Docker image...'
                 script {
-                    dir('backend') {
+                    dir('Backend') {  // Changed from 'backend' to 'Backend'
                         sh "docker build -t ${IMAGE_BACKEND}:${BUILD_TAG} ."
                         sh "docker tag ${IMAGE_BACKEND}:${BUILD_TAG} ${IMAGE_BACKEND}:latest"
                     }

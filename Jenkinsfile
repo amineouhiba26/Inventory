@@ -38,15 +38,15 @@ pipeline {
                 echo 'Verifying workspace contents...'
                 sh 'ls -la'
                 sh 'pwd'
-                sh 'echo "Files in backend directory:"; ls -la backend/ || echo "backend directory not found"'
-                sh 'echo "Files in frontend directory:"; ls -la frontend/ || echo "frontend directory not found"'
+                sh 'echo "Files in Backend directory:"; ls -la Backend/ || echo "Backend directory not found"'
+                sh 'echo "Files in Frontend directory:"; ls -la Frontend/ || echo "Frontend directory not found"'
             }
         }
         
         stage('Build + Push BACKEND') {
             when { 
                 anyOf {
-                    changeset 'backend/**'
+                    changeset 'Backend/**'    // Changed from 'backend/**' to 'Backend/**'
                     changeset 'Jenkinsfile'
                     expression { return env.BUILD_NUMBER == '1' }  // Always build on first run
                 }
@@ -60,7 +60,7 @@ pipeline {
                 )]) {
                     sh '''
                         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                        docker build -t ${IMAGE_BACKEND}:${BUILD_TAG} backend/
+                        docker build -t ${IMAGE_BACKEND}:${BUILD_TAG} Backend/
                         docker tag ${IMAGE_BACKEND}:${BUILD_TAG} ${IMAGE_BACKEND}:latest
                         docker push ${IMAGE_BACKEND}:${BUILD_TAG}
                         docker push ${IMAGE_BACKEND}:latest
@@ -72,7 +72,7 @@ pipeline {
         stage('Build + Push FRONTEND') {
             when { 
                 anyOf {
-                    changeset 'frontend/**'
+                    changeset 'Frontend/**'  // Changed from 'frontend/**' to 'Frontend/**'
                     changeset 'Jenkinsfile'
                     expression { return env.BUILD_NUMBER == '1' }  // Always build on first run
                 }
@@ -86,7 +86,7 @@ pipeline {
                 )]) {
                     sh '''
                         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                        docker build -t ${IMAGE_FRONTEND}:${BUILD_TAG} frontend/
+                        docker build -t ${IMAGE_FRONTEND}:${BUILD_TAG} Frontend/
                         docker tag ${IMAGE_FRONTEND}:${BUILD_TAG} ${IMAGE_FRONTEND}:latest
                         docker push ${IMAGE_FRONTEND}:${BUILD_TAG}
                         docker push ${IMAGE_FRONTEND}:latest
@@ -100,7 +100,7 @@ pipeline {
                 stage('Scan Backend') {
                     when { 
                         anyOf {
-                            changeset 'backend/**'
+                            changeset 'Backend/**'    // Changed from 'backend/**' to 'Backend/**'
                             changeset 'Jenkinsfile'
                             expression { return env.BUILD_NUMBER == '1' }
                         }
@@ -113,7 +113,7 @@ pipeline {
                 stage('Scan Frontend') {
                     when { 
                         anyOf {
-                            changeset 'frontend/**'
+                            changeset 'Frontend/**'  // Changed from 'frontend/**' to 'Frontend/**'
                             changeset 'Jenkinsfile'
                             expression { return env.BUILD_NUMBER == '1' }
                         }
