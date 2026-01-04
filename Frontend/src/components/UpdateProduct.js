@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
+import { productAPI } from '../services/api';
 
-export default function InsertProduct() {
+export default function UpdateProduct() {
     const [productName, setProductName] = useState("");
     const [productPrice, setProductPrice] = useState();
     const [productBarcode, setProductBarcode] = useState();
@@ -11,13 +12,13 @@ export default function InsertProduct() {
 
     const setName = (e) => {
         setProductName(e.target.value);
-      };
+    };
     
-      const setPrice = (e) => {
+    const setPrice = (e) => {
         setProductPrice(e.target.value);
-      };
+    };
     
-      const setBarcode = (e) => {
+    const setBarcode = (e) => {
         const value = e.target.value.slice(0, 12);
         setProductBarcode(value);
     };
@@ -26,30 +27,29 @@ export default function InsertProduct() {
 
     useEffect(() => {
         const getProduct = async () => {
-          try {
-            const res = await fetch(`http://localhost:3001/products/${id}`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json"
-              }
-            });
-      
-            const data = await res.json();
-      
-            if (res.status === 201) {
-              console.log("Data Retrieved.");
-              setProductName(data.ProductName);
-              setProductPrice(data.ProductPrice);
-              setProductBarcode(data.ProductBarcode);
-            } else {
-              console.log("Something went wrong. Please try again.");
+            try {
+                const response = await productAPI.getById(id);
+                
+                if (response.status === 200 && response.data.success) {
+                    console.log("Data Retrieved.");
+                    const product = response.data.data;
+                    setProductName(product.ProductName);
+                    setProductPrice(product.ProductPrice);
+                    setProductBarcode(product.ProductBarcode);
+                } else {
+                    const errorMessage = response.data?.message || "Something went wrong. Please try again.";
+                    setError(errorMessage);
+                }
+            } catch (err) {
+                console.error("Error fetching product:", err);
+                const errorMessage = err.response?.data?.message || "Failed to fetch product details.";
+                setError(errorMessage);
             }
-          } catch (err) {
-            console.log(err);
-          }
         };
-      
-        getProduct();
+        
+        if (id) {
+            getProduct();
+        }
     }, [id]);
 
     const updateProduct = async (e) => {
@@ -64,26 +64,34 @@ export default function InsertProduct() {
         setError("");
 
         try {
-            const response = await fetch(`http://localhost:3001/updateproduct/${id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ "ProductName": productName, "ProductPrice": productPrice, "ProductBarcode": productBarcode })
-            });
+            const productData = {
+                ProductName: productName,
+                ProductPrice: productPrice,
+                ProductBarcode: productBarcode
+            };
+            
+            const response = await productAPI.update(id, productData);
 
-            await response.json();
-
-            if (response.status === 201) {
+            if (response.status === 200 && response.data.success) {
                 alert("Data Updated");
                 navigate('/products');
-            }
-            else {
-                setError("Something went wrong. Please try again.");
+            } else {
+                const errorMessage = response.data?.message || "Something went wrong. Please try again.";
+                setError(errorMessage);
             }
         } catch (err) {
-            setError("An error occurred. Please try again later.");
-            console.log(err);
+            console.error("Error updating product:", err);
+            if (err.response?.status === 422) {
+                const errorMessage = err.response.data?.message || "Another product already has this barcode.";
+                setError(errorMessage);
+            } else if (err.response?.status === 400) {
+                const errorMessage = err.response.data?.message || "Please fill in all required fields.";
+                setError(errorMessage);
+            } else if (err.response?.status === 404) {
+                setError("Product not found.");
+            } else {
+                setError("An error occurred. Please try again later.");
+            }
         } finally {
             setLoading(false);
         }

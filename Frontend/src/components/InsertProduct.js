@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom';
+import { productAPI } from '../services/api';
 
 export default function InsertProduct() {
     const [productName, setProductName] = useState("");
@@ -34,32 +35,35 @@ export default function InsertProduct() {
         setError("");
 
         try {
-            const res = await fetch("http://localhost:3001/insertproduct", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ "ProductName": productName, "ProductPrice": productPrice, "ProductBarcode": productBarcode })
-            });
+            const productData = {
+                ProductName: productName,
+                ProductPrice: productPrice,
+                ProductBarcode: productBarcode
+            };
+            
+            const response = await productAPI.create(productData);
 
-            await res.json();
-
-            if (res.status === 201) {
+            if (response.status === 201 && response.data.success) {
                 alert("Data Inserted");
                 setProductName("");
                 setProductPrice(0);
                 setProductBarcode(0);
                 navigate('/products');
-            }
-            else if (res.status === 422) {
-                alert("Product is already added with that barcode.");
-            }
-            else {
-                setError("Something went wrong. Please try again.");
+            } else {
+                const errorMessage = response.data?.message || "Something went wrong. Please try again.";
+                setError(errorMessage);
             }
         } catch (err) {
-            setError("An error occurred. Please try again later.");
-            console.log(err);
+            console.error("Error creating product:", err);
+            if (err.response && err.response.status === 422) {
+                const errorMessage = err.response.data?.message || "Product is already added with that barcode.";
+                alert(errorMessage);
+            } else if (err.response && err.response.status === 400) {
+                const errorMessage = err.response.data?.message || "Please fill in all required fields.";
+                setError(errorMessage);
+            } else {
+                setError("An error occurred. Please try again later.");
+            }
         } finally {
             setLoading(false);
         }

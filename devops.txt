@@ -1,0 +1,187 @@
+🟩 PHASE 2 — Docker (Mandatory)
+
+Goal: Containerize the app.
+
+Tasks
+
+ Create Dockerfile
+
+ App runs with docker run
+
+ Use environment variables
+
+ Expose port
+
+Deliverables
+
+Dockerfile
+
+.dockerignore
+
+🚫 Do NOT
+
+Use multi-stage builds unless needed
+
+Optimize image size aggressively
+
+🟩 PHASE 3 — Docker Compose (Local Test)
+
+Goal: Prove the container works locally.
+
+Tasks
+
+ Create docker-compose.yml
+
+ Run app with docker-compose up
+
+ Access app in browser
+
+Deliverables
+
+docker-compose.yml
+
+🚫 Do NOT
+
+Add databases or networks unless required
+
+🟩 PHASE 4 — CI Pipeline (Jenkins)
+
+Goal: Automate build → scan → push.
+
+Jenkins Pipeline Stages
+
+ Checkout code
+
+ Build Docker image
+
+ Scan image with Trivy
+
+ Push image to Docker Hub
+
+Deliverables
+
+Jenkinsfile
+
+💡 Minimum acceptable Jenkinsfile:
+
+Declarative pipeline
+
+Docker Hub credentials via Jenkins secrets
+
+🚫 Do NOT
+
+Add tests if your app has none
+
+Add CD here (deployment is separate)
+
+🟩 PHASE 5 — Kubernetes (Docker Desktop)
+
+Goal: Deploy the app on local Kubernetes.
+
+Tasks
+
+ Enable Kubernetes in Docker Desktop
+
+ Create Deployment
+
+ Create Service (NodePort or ClusterIP)
+
+ Use environment variables
+
+ Add liveness/readiness probes
+
+Deliverables
+
+k8s/deployment.yaml
+
+k8s/service.yaml
+
+💡 One replica is enough.
+
+🚫 Do NOT
+
+Use Ingress (not required)
+
+Use secrets unless needed
+
+🟩 PHASE 6 — Helm (Required but Simple)
+
+Goal: Package Kubernetes manifests.
+
+Tasks
+
+ Create Helm chart
+
+ Template Deployment & Service
+
+ values.yaml for:
+
+image name
+
+image tag
+
+port
+
+Deliverables
+
+helm/devops-app/
+
+🚫 Do NOT
+
+Over-template
+
+Add conditions or helpers unless needed
+
+🟩 PHASE 7 — Monitoring (Mandatory)
+
+Goal: Show observability exists.
+
+Prometheus
+
+ Install using Helm
+
+ Scrape Kubernetes metrics
+
+ (Optional) scrape app metrics
+
+Grafana
+
+ Install using Helm
+
+ Import one existing dashboard
+
+ Show CPU / memory / pod status
+
+Deliverables
+
+Helm commands in documentation
+
+Screenshot of Grafana dashboard
+
+🚫 Do NOT
+
+Build custom exporters
+
+Write PromQL from scratch
+
+🟦 PHASE 8 — GitOps (Optional but Smart Bonus)
+
+Goal: Minimal ArgoCD usage.
+
+Tasks
+
+ Install ArgoCD
+
+ Connect Git repo
+
+ Sync Helm chart
+
+Deliverables
+
+ArgoCD application YAML
+
+Screenshot of synced app
+
+🚫 Do NOT
+
+Add complex sync policies
