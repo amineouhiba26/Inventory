@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Create axios instance with base configuration
-// Use environment variable or fallback to localhost
+// Use environment variable or fallback to NodePort 30001
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:30001',
   headers: {
     'Content-Type': 'application/json',
   },
