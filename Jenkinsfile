@@ -6,8 +6,8 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-personal-token'
-        IMAGE_BACKEND = 'amineouhiba26/inventory-backend'
-        IMAGE_FRONTEND = 'amineouhiba26/inventory-frontend'
+        IMAGE_BACKEND = 'amineouhiba/inventory-backend'
+        IMAGE_FRONTEND = 'amineouhiba/inventory-frontend'
         BUILD_TAG = "${env.BUILD_NUMBER}"
         GIT_REPO = 'https://github.com/amineouhiba26/Inventory.git'
         GIT_BRANCH = 'devops'
