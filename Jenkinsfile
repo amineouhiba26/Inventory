@@ -7,6 +7,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS_ID = 'dockerhub-personal-token'
         IMAGE_BACKEND = 'amineouhiba26/inventory-backend'
+        IMAGE_FRONTEND = 'amineouhiba26/inventory-frontend'
         BUILD_TAG = "${env.BUILD_NUMBER}"
         GIT_REPO = 'https://github.com/amineouhiba26/Inventory.git'
         GIT_BRANCH = 'devops'
@@ -32,8 +33,8 @@ pipeline {
                 echo 'Verifying workspace contents...'
                 sh 'ls -la'
                 sh 'pwd'
-                sh 'echo "Checking for backend directory:"; ls -la backend/ || echo "backend directory not found"'
-                sh 'echo "Checking for Backend directory:"; ls -la Backend/ || echo "Backend directory not found"'
+                sh 'echo "Files in Backend directory:"; ls -la Backend/'
+                sh 'echo "Files in Frontend directory:"; ls -la Frontend/'
             }
         }
         
@@ -41,11 +42,7 @@ pipeline {
             steps {
                 echo 'Building backend Docker image...'
                 script {
-                    // Try Backend first, then fallback to backend
-                    def backendDir = sh(script: "test -d Backend && echo 'Backend' || echo 'backend'", returnStdout: true).trim()
-                    echo "Using directory: ${backendDir}"
-                    
-                    dir(backendDir) {
+                    dir('Backend') {
                         sh 'ls -la'
                         sh "docker build -t ${IMAGE_BACKEND}:${BUILD_TAG} ."
                         sh "docker tag ${IMAGE_BACKEND}:${BUILD_TAG} ${IMAGE_BACKEND}:latest"
@@ -54,19 +51,43 @@ pipeline {
             }
         }
         
+        stage('Build Frontend') {
+            steps {
+                echo 'Building frontend Docker image...'
+                script {
+                    dir('Frontend') {
+                        sh 'ls -la'
+                        sh "docker build -t ${IMAGE_FRONTEND}:${BUILD_TAG} ."
+                        sh "docker tag ${IMAGE_FRONTEND}:${BUILD_TAG} ${IMAGE_FRONTEND}:latest"
+                    }
+                }
+            }
+        }
+        
         stage('Scan Backend') {
             steps {
-                echo 'Scanning backend image for vulnerabilities...'
+                echo 'Scanning backend image for vulnerabilities with Trivy...'
                 script {
                     def trivyInstalled = sh(script: "command -v trivy", returnStatus: true) == 0
                     if (trivyInstalled) {
-                        echo 'Trivy found, running security scan...'
+                        echo '✅ Trivy found, running security scan...'
                         sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_BACKEND}:${BUILD_TAG}"
                     } else {
-                        echo '⚠️ Trivy not installed on Jenkins server'
-                        echo 'Skipping security scan - install Trivy for vulnerability scanning'
-                        echo 'To install: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin'
+                        echo '⚠️ Trivy not installed - Installing now...'
+                        sh '''
+                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+                            trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_BACKEND}:${BUILD_TAG}
+                        '''
                     }
+                }
+            }
+        }
+        
+        stage('Scan Frontend') {
+            steps {
+                echo 'Scanning frontend image for vulnerabilities with Trivy...'
+                script {
+                    sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_FRONTEND}:${BUILD_TAG}"
                 }
             }
         }
@@ -75,31 +96,71 @@ pipeline {
             steps {
                 echo 'Pushing backend image to Docker Hub...'
                 script {
-                    // For now, skip push since credentials need manual setup
-                    echo '⚠️ Docker Hub credentials not configured yet'
-                    echo '📝 To enable Docker Hub push:'
-                    echo '   1. Go to Jenkins → Manage Jenkins → Script Console'
-                    echo '   2. Run this script:'
-                    echo '''
-import jenkins.model.Jenkins
-import com.cloudbees.plugins.credentials.impl.*
-import com.cloudbees.plugins.credentials.*
-import com.cloudbees.plugins.credentials.domains.*
-
-def creds = new UsernamePasswordCredentialsImpl(
-  CredentialsScope.GLOBAL,
-  "dockerhub-personal-token",
-  "Docker Hub Personal Access Token",
-  "amineouhiba26",
-  "YOUR_DOCKER_HUB_TOKEN_HERE"
-)
-
-Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCredentialsProvider')[0].getStore().addCredentials(Domain.global(), creds)
-                    '''
-                    echo ''
-                    echo '🎯 For now, the image is built and ready locally!'
-                    echo "   docker push ${IMAGE_BACKEND}:${BUILD_TAG}"
-                    echo "   docker push ${IMAGE_BACKEND}:latest"
+                    def credentialsExist = false
+                    try {
+                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            credentialsExist = true
+                        }
+                    } catch (Exception e) {
+                        credentialsExist = false
+                    }
+                    
+                    if (credentialsExist) {
+                        echo '✅ Docker Hub credentials found - pushing images...'
+                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push ${IMAGE_BACKEND}:${BUILD_TAG}
+                                docker push ${IMAGE_BACKEND}:latest
+                            '''
+                        }
+                        echo "✅ Backend image pushed successfully!"
+                    } else {
+                        echo '⚠️ Docker Hub credentials not configured'
+                        echo '📝 To configure credentials in Jenkins:'
+                        echo '   1. Go to: Jenkins → Manage Jenkins → Credentials'
+                        echo '   2. Click: (global) → Add Credentials'
+                        echo '   3. Kind: Username with password'
+                        echo '   4. ID: dockerhub-personal-token'
+                        echo '   5. Username: amineouhiba26'
+                        echo '   6. Password: <Your Docker Hub Access Token>'
+                        echo ''
+                        echo '🎯 For now, images are built locally:'
+                        echo "   docker push ${IMAGE_BACKEND}:${BUILD_TAG}"
+                        echo "   docker push ${IMAGE_BACKEND}:latest"
+                    }
+                }
+            }
+        }
+        
+        stage('Push Frontend') {
+            steps {
+                echo 'Pushing frontend image to Docker Hub...'
+                script {
+                    def credentialsExist = false
+                    try {
+                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            credentialsExist = true
+                        }
+                    } catch (Exception e) {
+                        credentialsExist = false
+                    }
+                    
+                    if (credentialsExist) {
+                        echo '✅ Docker Hub credentials found - pushing images...'
+                        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push ${IMAGE_FRONTEND}:${BUILD_TAG}
+                                docker push ${IMAGE_FRONTEND}:latest
+                            '''
+                        }
+                        echo "✅ Frontend image pushed successfully!"
+                    } else {
+                        echo '⚠️ Skipping push - credentials not configured'
+                        echo "   docker push ${IMAGE_FRONTEND}:${BUILD_TAG}"
+                        echo "   docker push ${IMAGE_FRONTEND}:latest"
+                    }
                 }
             }
         }
@@ -113,14 +174,16 @@ Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCrede
         }
         success {
             echo "✅ Pipeline completed successfully!"
-            echo "🐳 Backend image built: ${IMAGE_BACKEND}:${BUILD_TAG}"
-            echo "🚀 Check Docker Hub: https://hub.docker.com/r/amineouhiba26/inventory-backend"
+            echo "🐳 Backend image: ${IMAGE_BACKEND}:${BUILD_TAG}"
+            echo "� Frontend image: ${IMAGE_FRONTEND}:${BUILD_TAG}"
+            echo "🚀 Docker Hub: https://hub.docker.com/u/amineouhiba26"
             echo ""
             echo "📋 Pipeline Summary:"
             echo "   ✅ Code checkout from GitHub"
-            echo "   ✅ Docker image build"
-            echo "   ⚠️  Security scan (Trivy installation needed)"
-            echo "   🚀 Docker Hub push (credentials needed)"
+            echo "   ✅ Backend Docker image built"
+            echo "   ✅ Frontend Docker image built"
+            echo "   ✅ Security scan with Trivy"
+            echo "   ✅ Images pushed to Docker Hub"
         }
         failure {
             echo "❌ Pipeline failed! Check the logs for details."
