@@ -35,11 +35,11 @@ mongodb:
 
 backend:
   enabled: true
-  replicaCount: 3
+  replicaCount: 1
   image:
     repository: amineouhiba/inventory-backend
     tag: "latest"
-    pullPolicy: Always
+    pullPolicy: Never
   
   service:
     type: NodePort
@@ -72,7 +72,7 @@ frontend:
   image:
     repository: amineouhiba/inventory-frontend
     tag: "latest"
-    pullPolicy: Always
+    pullPolicy: Never
   
   service:
     type: NodePort
