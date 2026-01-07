@@ -80,7 +80,7 @@ frontend:
   
   service:
     type: NodePort
-    port: 3000
+    port: 80
     nodePort: 30002
   
   env:
