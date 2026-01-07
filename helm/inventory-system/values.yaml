@@ -68,7 +68,7 @@ backend:
 
 frontend:
   enabled: true
-  replicaCount: 2
+  replicaCount: 5
   image:
     repository: amineouhiba/inventory-frontend
     tag: "latest"
