@@ -35,7 +35,7 @@ mongodb:
 
 backend:
   enabled: true
-  replicaCount: 1
+  replicaCount: 3
   image:
     repository: amineouhiba/inventory-backend
     tag: "latest"
