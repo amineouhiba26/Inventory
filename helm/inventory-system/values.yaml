@@ -66,6 +66,10 @@ backend:
       memory: "512Mi"
       cpu: "500m"
 
+  serviceMonitor:
+    enabled: true
+    name: inventory-backend-monitor
+
 frontend:
   enabled: true
   replicaCount: 2
