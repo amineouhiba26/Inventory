@@ -15,7 +15,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",
-    "mongoose": "^7.2.1"
+    "mongoose": "^7.2.1",
+    "prom-client": "^14.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

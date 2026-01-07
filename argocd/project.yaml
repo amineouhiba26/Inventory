@@ -14,6 +14,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: inventory-*
       server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
   
   # Allow deploying from these Git repositories
   sourceRepos:
@@ -45,6 +47,8 @@ spec:
       kind: Job
     - group: 'batch'
       kind: CronJob
+    - group: 'monitoring.coreos.com'
+      kind: ServiceMonitor
   
   # Orphaned resources handling
   orphanedResources:

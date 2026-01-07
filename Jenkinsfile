@@ -1,4 +1,4 @@
-// Jenkins Pipeline Script (Direct Input)
+  // Jenkins Pipeline Script (Direct Input)
 // Copy this entire content and paste it into Jenkins as "Pipeline script"
 
 pipeline {
@@ -33,8 +33,8 @@ pipeline {
                 echo 'Verifying workspace contents...'
                 sh 'ls -la'
                 sh 'pwd'
-                sh 'echo "Files in Backend directory:"; ls -la Backend/'
-                sh 'echo "Files in Frontend directory:"; ls -la Frontend/'
+                sh 'echo "Files in Backend directory:"; ls -la backend/'
+                sh 'echo "Files in Frontend directory:"; ls -la frontend/'
             }
         }
         
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 echo 'Building backend Docker image...'
                 script {
-                    dir('Backend') {
+                    dir('backend') {
                         sh 'ls -la'
                         sh "docker build -t ${IMAGE_BACKEND}:${BUILD_TAG} ."
                         sh "docker tag ${IMAGE_BACKEND}:${BUILD_TAG} ${IMAGE_BACKEND}:latest"
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 echo 'Building frontend Docker image...'
                 script {
-                    dir('Frontend') {
+                    dir('frontend') {
                         sh 'ls -la'
                         sh "docker build -t ${IMAGE_FRONTEND}:${BUILD_TAG} ."
                         sh "docker tag ${IMAGE_FRONTEND}:${BUILD_TAG} ${IMAGE_FRONTEND}:latest"

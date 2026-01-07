@@ -36,7 +36,20 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+// Mount router on /api to match Nginx proxy
+app.use('/api', router);
+// Keep root router for direct access if needed
 app.use(router);
+
+// Prometheus Metrics
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});
 
 // Health check endpoint for DevOps monitoring
 app.get('/health', (req, res) => {

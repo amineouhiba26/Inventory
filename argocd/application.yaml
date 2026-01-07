@@ -19,10 +19,10 @@ spec:
       parameters:
         - name: namespace
           value: inventory-system
-        - name: backend.replicaCount
-          value: "3"
-        - name: frontend.replicaCount
-          value: "3"
+        - name: backend.image.pullPolicy
+          value: "Never"
+        - name: frontend.image.pullPolicy
+          value: "Never"
   
   destination:
     server: https://kubernetes.default.svc

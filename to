@@ -1,0 +1,49 @@
+Cahier des Charges - Mini-projet DevOps
+
+1. Introduction
+Ce mini-projet DevOps a pour but de conteneuriser et d ́eployer une application web d ́ej`a d ́evelopp ́ee
+par l’ ́etudiant. L’orchestration se fera sur un cluster Kubernetes local via Docker Desktop. Les services
+manag ́es (AKS/EKS) restent optionnels mais ne sont pas requis.
+Le projet couvre l’automatisation CI, le d ́eploiement Kubernetes, et l’observabilit ́e (monitoring). Des
+extensions optionnelles (service mesh et IaC) peuvent ˆetre ajout ́ees.
+2. Objectifs du projet
+• Partir d’une application web d ́ej`a d ́evelopp ́ee par l’ ́etudiant (MVC ou microservices).
+• Conteneuriser l’application avec Docker (Dockerfile et Docker Compose).
+• D ́eployer l’application sur Kubernetes local (Docker Desktop).
+• Mettre en place l’observabilit ́e post-d ́eploiement (Prometheus + Grafana).
+3. Contenu du projet
+3.1. Application
+L’application doit ˆetre d ́ej`a fonctionnelle et compatible avec la conteneurisation (services, d ́ependances,
+variables d’environnement, etc.). Une architecture MVC ou microservices est recommand ́ee.
+3.2. Conteneurisation
+Le projet exige d’empaqueter l’application dans des conteneurs Docker. Les livrables incluront :
+• Un ou plusieurs Dockerfile(s) (selon l’architecture).
+• Un fichier docker-compose.yml pour ex ́ecuter et tester l’application en local.
+3.3. Int ́egration continue avec Jenkins
+Un pipeline Jenkins automatisera la construction et la distribution. Le Jenkinsfile contiendra :
+• Build : construction de l’image Docker.
+• Scan des vuln ́erabilit ́es : utilisation de Trivy.
+• Push sur Docker Hub : publication de l’image si les  ́etapes pr ́ec ́edentes sont valid ́ees.
+3.4. Kubernetes local (Docker Desktop)
+Le d ́eploiement se fera sur Kubernetes (Docker Desktop). Les  ́etapes incluront :
+• Activation/configuration du cluster Kubernetes local.
+• Application des manifestes Kubernetes (Deployments, Services, ConfigMap, etc.).
+• Utilisation de Helm Charts pour g ́erer le d ́eploiement.
+• (recommand ́e) Int ́egration de ArgoCD pour une approche GitOps.
+
+1
+
+Dr. Salah Gontara DevOps 2025-26
+
+3.5. Monitoring et Observabilit ́e
+L’int ́egration d’un syst`eme d’observabilit ́e est obligatoire :
+• D ́eploiement de Prometheus (m ́etriques application + cluster).
+• Int ́egration de Grafana (dashboards, visualisation, alertes simples si souhait ́e).
+
+
+• Code source de l’application (d ́evelopp ́ee par l’ ́etudiant).
+• Dockerfiles et fichier docker-compose.
+• Jenkinsfile pour l’int ́egration continue.
+• Manifestes Kubernetes pour Docker Desktop.
+• Helm Charts, et ArgoCD.
+• Fichiers de configuration Prometheus/Grafana.
